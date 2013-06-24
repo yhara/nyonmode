@@ -12,5 +12,7 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require opal
 //= require turbolinks
 //= require_tree .
+
