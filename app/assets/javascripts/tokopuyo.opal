@@ -51,6 +51,16 @@ class Pair
     @rot = 0
     move(x, y)
   end
+  attr_reader :rot
+
+  def self.newrot(rot, dir)
+    (rot + dir) % Pair::ROT.size
+  end
+
+  def self.positions(c, r, rot)
+    [ [c, r],
+      [c + ROT[rot][0], r + ROT[rot][1]] ]
+  end
 
   def move(x, y)
     @x, @y = x, y
@@ -60,8 +70,8 @@ class Pair
                    @y + ROT[@rot][1] * Puyo::HEIGHT)
   end
 
-  def rot(dir)
-    @rot = (@rot + (dir > 0 ? +1 : -1)) % ROT.size
+  def rotate(dir)
+    @rot = Pair.newrot(@rot, dir)
     move(@x, @y)
   end
 end
@@ -79,20 +89,26 @@ class Field
   def initialize
     @field = Array.new(ROWS){ Array.new(COLS) }
 
-    (2...ROWS).each do |j|
-      COLS.times do |i|
-        #@field[j][i] = Puyo.new(col2x(i), row2y(j))
-      end
-    end
-
     @nexts = Nexts.new
-    @current = Pair.new(col2x(COLS/2-1), row2y(0))
+    @current = Current.new
   end
 
-  private
+  def on_keydown(code)
+    case code
+    when 37 #left
+      @current.move(-1)
+    when 39 #right
+      @current.move(+1)
+    when 40 #down
+    when 90 #z
+      @current.rotate(-1)
+    when 88 #x
+      @current.rotate(+1)
+    end
+  end
 
-  def col2x(i); x = LEFT + Puyo::WIDTH * i; end
-  def row2y(j); y = TOP + Puyo::HEIGHT * j; end
+  def self.col2x(i); x = LEFT + Puyo::WIDTH * i; end
+  def self.row2y(j); y = TOP + Puyo::HEIGHT * j; end
 end
 
 class Nexts
@@ -110,11 +126,46 @@ class Nexts
   end
 end
 
+class Current
+  def initialize
+    @c = Field::COLS/2 - 1
+    @r = 0
+    @pair = Pair.new(Field.col2x(@c), Field.row2y(@r))
+  end
+
+  def move(dir)
+    if valid?(@c + dir, @r, @pair.rot)
+      @c += dir
+      @pair.move(Field.col2x(@c), Field.row2y(@r))
+    end
+  end
+
+  def rotate(dir)
+    if valid?(@c, @r, Pair.newrot(@pair.rot, dir))
+      @pair.rotate(dir)
+    else
+      move(@c == 0 ? +1 : -1)
+      @pair.rotate(dir)
+    end
+  end
+
+  private
+
+  def valid?(c, r, rot)
+    Pair.positions(c, r, rot).all?{|pos|
+      (0...Field::COLS).cover?(pos[0])
+    }
+  end
+end
 
 # ---
 
 def onload(&block)
   %x{ window.onload = block }
+end
+
+def onkeydown(&block)
+  %x{ $(window).on("keydown", function(e){ block(e.keyCode) }) }
 end
 
 onload do
@@ -125,4 +176,8 @@ onload do
   bg.attr("fill", "#533")
 
   field = Field.new
+
+  onkeydown{|code|
+    field.on_keydown(code)
+  }
 end
