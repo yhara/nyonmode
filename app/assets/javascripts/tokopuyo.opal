@@ -1,3 +1,7 @@
+#
+# raphaeljs binding for Opal
+#
+
 def Raphael(a, b, c, d)
   `Raphael(a, b, c, d)`
 end
@@ -44,30 +48,38 @@ class Puyo
 end
 
 class Pair
-  ROT = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+  N_PUYOS = 2
+  ROT = [[[0, 0], [0, -1]],
+         [[0, 0], [1, 0]],
+         [[0, 0], [0, 1]],
+         [[0, 0], [-1, 0]]]
+  raise "[bug] invalid ROT" if ROT.any?{|poss| poss.size != N_PUYOS or
+                                        poss.any?{|pos| pos.size != 2}}
 
   def initialize(x, y)
-    @puyos = Array.new(2){ Puyo.new }
+    @puyos = Array.new(N_PUYOS){ Puyo.new }
     @rot = 0
     move(x, y)
   end
   attr_reader :rot
 
   def self.newrot(rot, dir)
-    (rot + dir) % Pair::ROT.size
+    (rot + dir) % ROT.size
   end
 
   def self.positions(c, r, rot)
-    [ [c, r],
-      [c + ROT[rot][0], r + ROT[rot][1]] ]
+    (0...N_PUYOS).map{|i|
+      [c + ROT[rot][i][0], r + ROT[rot][i][1]] 
+    }
   end
 
   def move(x, y)
     @x, @y = x, y
 
-    @puyos[0].move(@x, @y)
-    @puyos[1].move(@x + ROT[@rot][0] * Puyo::WIDTH,
-                   @y + ROT[@rot][1] * Puyo::HEIGHT)
+    @puyos.each_with_index do |puyo, i|
+      puyo.move(@x + ROT[@rot][i][0] * Puyo::WIDTH,
+                @y + ROT[@rot][i][1] * Puyo::HEIGHT)
+    end
   end
 
   def rotate(dir)
@@ -86,6 +98,9 @@ class Field
   RIGHT  = LEFT + WIDTH
   BOTTOM = TOP  + HEIGHT
 
+  def self.col2x(i); x = LEFT + Puyo::WIDTH * i; end
+  def self.row2y(j); y = TOP + Puyo::HEIGHT * j; end
+
   def initialize
     @field = Array.new(ROWS){ Array.new(COLS) }
 
@@ -100,6 +115,7 @@ class Field
     when 39 #right
       @current.move(+1)
     when 40 #down
+      drop
     when 90 #z
       @current.rotate(-1)
     when 88 #x
@@ -107,8 +123,11 @@ class Field
     end
   end
 
-  def self.col2x(i); x = LEFT + Puyo::WIDTH * i; end
-  def self.row2y(j); y = TOP + Puyo::HEIGHT * j; end
+  private
+
+  def drop
+
+  end
 end
 
 class Nexts
@@ -132,6 +151,7 @@ class Current
     @r = 0
     @pair = Pair.new(Field.col2x(@c), Field.row2y(@r))
   end
+  attr_reader :c, :r
 
   def move(dir)
     if valid?(@c + dir, @r, @pair.rot)
