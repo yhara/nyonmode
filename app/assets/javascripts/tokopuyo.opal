@@ -2,6 +2,7 @@
 # raphaeljs binding for Opal
 #
 
+
 def Raphael(a, b, c, d)
   `Raphael(a, b, c, d)`
 end
@@ -13,6 +14,7 @@ end
 
 class Element < `Raphael.el.constructor`
   alias_native :attr, :attr
+  alias_native :remove, :remove
 end
 
 # ---
@@ -29,6 +31,7 @@ class Puyo
     @color = COLORS.shuffle.first
     move(x, y) if x && y
   end
+  attr_reader :color
 
   def move(x, y)
     @x, @y = x, y
@@ -36,6 +39,10 @@ class Puyo
     @circle ||= render
     @circle.attr("cx", @x + RADIUS)
     @circle.attr("cy", @y + RADIUS)
+  end
+
+  def remove
+    @circle.remove
   end
 
   private
@@ -106,6 +113,7 @@ class Field
 
   def initialize
     @field = Array.new(ROWS){ Array.new(COLS) }
+    @state = :normal
 
     @nexts = Nexts.new
     @current = Current.new(@nexts.shift)
@@ -128,6 +136,10 @@ class Field
 
   private
 
+  def move_puyo(puyo, c, r)
+    puyo.move(Field.col2x(c), Field.row2y(r))
+  end
+
   def drop
     @current.positions.each_with_index do |pos, i|
       c, r = *pos
@@ -135,10 +147,94 @@ class Field
                  @field[rr][c].nil?
                } || 0
       @field[drop_r][c] = @current.pair.puyos[i]
-      @current.pair.puyos[i].move(Field.col2x(c), Field.row2y(drop_r))
+      move_puyo(@current.pair.puyos[i], c, drop_r)
     end
 
     @current = Current.new(@nexts.shift)
+    envanish
+  end
+
+  NEIGHBORS = [[+1, 0], [0, +1], [-1, 0], [0, -1]]
+  VANISH_COUNT = 4
+  def envanish
+    state = :vanishing
+
+    # Mark empty cells as already visited
+    visited = @field.map{|row| row.map{|cell| cell.nil? ? true : false}}
+    to_vanish = []
+    q = [[0, ROWS-1]] # start from bottom left corner
+    while (pos = next_visible_pos(visited))
+      poss = connected_visible_puyos(pos[0], pos[1], visited)
+      to_vanish.concat(poss) if poss.length >= VANISH_COUNT
+    end
+
+    # Remove puyos
+    to_vanish.each do |pos|
+      @field[pos[1]][pos[0]].remove
+      @field[pos[1]][pos[0]] = nil
+    end
+
+    timer(1) do
+      # Drop puyos
+      (0...ROWS).to_a.reverse.each do |j|
+        (0...COLS).each do |i|
+          if @field[j][i].nil? and (jj = (0...j).find{|jj| @field[jj][i] != nil})
+            move_puyo(@field[jj][i], i, j)
+            @field[j][i] = @field[jj][i]
+            @field[jj][i] = nil
+          end
+        end
+      end
+
+      state = :normal
+    end
+  end
+
+  private
+
+  def timer(sec, &block)
+    %x{ setTimeout(block, sec*1000) }
+  end
+
+  # Returns a position not visited yet, or return nil if there are none.
+  # Invisible area (c==0, 1) are not counted.
+  def next_visible_pos(visited)
+    # Note: due to bug of opal 0.3.44, cannot escape from method with +return+ in a block
+    ret = nil
+    (2...ROWS).each do |j|
+      (0...COLS).each do |i|
+        if not visited[j][i]
+          ret ||= [i, j]
+        end
+      end
+    end
+    return ret
+  end
+
+  # Returns positions of puyos of the same color as (c, r).
+  # Invisible area (c==0, 1) are not counted.
+  # Destructively updates +visited+.
+  def connected_visible_puyos(c, r, visited)
+    col = @field[r][c].color
+    poss = [[c, r]]
+    q = [[c, r]]
+    until q.empty?
+      i, j = *q.shift
+      visited[j][i] = true
+      NEIGHBORS.each do |dij|
+        di, dj = *dij
+        ni, nj = i+di, j+dj
+        next unless (0...COLS)===ni && (2...ROWS)===nj
+        next if visited[nj][ni]
+
+        if @field[nj][ni].color == col
+          poss.push([ni, nj])
+          q.push([ni, nj])
+        end
+      end
+    end
+
+    return poss
   end
 end
 
