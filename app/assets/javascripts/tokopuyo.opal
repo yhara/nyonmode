@@ -61,7 +61,7 @@ class Pair
     @rot = 0
     move(x, y)
   end
-  attr_reader :rot
+  attr_reader :puyos, :rot
 
   def self.newrot(rot, dir)
     (rot + dir) % ROT.size
@@ -72,7 +72,7 @@ class Pair
       [c + ROT[rot][i][0], r + ROT[rot][i][1]] 
     }
   end
-
+  
   def move(x, y)
     @x, @y = x, y
 
@@ -94,7 +94,7 @@ class Field
   TOP  = Puyo::HEIGHT
   LEFT = 0
   WIDTH  = Puyo::WIDTH  * COLS
-  HEIGHT = Puyo::HEIGHT * ROWS
+  HEIGHT = Puyo::HEIGHT * (ROWS + 1)
   RIGHT  = LEFT + WIDTH
   BOTTOM = TOP  + HEIGHT
 
@@ -126,7 +126,14 @@ class Field
   private
 
   def drop
-
+    @current.positions.each_with_index do |pos, i|
+      c, r = *pos
+      drop_r = (0...ROWS).to_a.reverse.find{|rr|
+                 @field[rr][c].nil?
+               } || 0
+      @field[drop_r][c] = @current.pair.puyos[i]
+      @current.pair.puyos[i].move(Field.col2x(c), Field.row2y(drop_r))
+    end
   end
 end
 
@@ -151,7 +158,7 @@ class Current
     @r = 0
     @pair = Pair.new(Field.col2x(@c), Field.row2y(@r))
   end
-  attr_reader :c, :r
+  attr_reader :c, :r, :pair
 
   def move(dir)
     if valid?(@c + dir, @r, @pair.rot)
@@ -167,6 +174,10 @@ class Current
       move(@c == 0 ? +1 : -1)
       @pair.rotate(dir)
     end
+  end
+
+  def positions
+    Pair.positions(@c, @r, @pair.rot)
   end
 
   private
