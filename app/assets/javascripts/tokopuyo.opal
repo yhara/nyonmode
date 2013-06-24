@@ -56,10 +56,10 @@ class Pair
   raise "[bug] invalid ROT" if ROT.any?{|poss| poss.size != N_PUYOS or
                                         poss.any?{|pos| pos.size != 2}}
 
-  def initialize(x, y)
+  def initialize(x=nil, y=nil)
     @puyos = Array.new(N_PUYOS){ Puyo.new }
     @rot = 0
-    move(x, y)
+    move(x, y) if x && y
   end
   attr_reader :puyos, :rot
 
@@ -105,7 +105,7 @@ class Field
     @field = Array.new(ROWS){ Array.new(COLS) }
 
     @nexts = Nexts.new
-    @current = Current.new
+    @current = Current.new(@nexts.shift)
   end
 
   def on_keydown(code)
@@ -134,6 +134,8 @@ class Field
       @field[drop_r][c] = @current.pair.puyos[i]
       @current.pair.puyos[i].move(Field.col2x(c), Field.row2y(drop_r))
     end
+
+    @current = Current.new(@nexts.shift)
   end
 end
 
@@ -144,19 +146,34 @@ class Nexts
   TOP  = Field::TOP + Puyo::HEIGHT/2
 
   def initialize
-    @pairs = Array.new(N_PAIRS){|i|
+    @pairs = Array.new(N_PAIRS){ Pair.new }
+    rearrange
+  end
+
+  def shift
+    next_pair = @pairs.shift
+    @pairs.push(Pair.new)
+    rearrange
+    return next_pair
+  end
+
+  private
+
+  def rearrange
+    @pairs.each_with_index do |pair, i|
       x = LEFT + Puyo::WIDTH * (i*1.5)
       y = Nexts::TOP
-      Pair.new(x, y)
-    }
+      pair.move(x, y)
+    end
   end
 end
 
 class Current
-  def initialize
+  def initialize(pair)
     @c = Field::COLS/2 - 1
     @r = 0
-    @pair = Pair.new(Field.col2x(@c), Field.row2y(@r))
+    @pair = pair
+    @pair.move(Field.col2x(@c), Field.row2y(@r))
   end
   attr_reader :c, :r, :pair
 
