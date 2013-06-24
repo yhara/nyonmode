@@ -81,12 +81,18 @@ class Field
 
     (2...ROWS).each do |j|
       COLS.times do |i|
-        x = LEFT + Puyo::WIDTH * i
-        y = TOP + Puyo::HEIGHT * j
-        @field[j][i] = Puyo.new(x, y)
+        #@field[j][i] = Puyo.new(col2x(i), row2y(j))
       end
     end
+
+    @nexts = Nexts.new
+    @current = Pair.new(col2x(COLS/2-1), row2y(0))
   end
+
+  private
+
+  def col2x(i); x = LEFT + Puyo::WIDTH * i; end
+  def row2y(j); y = TOP + Puyo::HEIGHT * j; end
 end
 
 class Nexts
@@ -119,5 +125,4 @@ onload do
   bg.attr("fill", "#533")
 
   field = Field.new
-  nexts = Nexts.new
 end
