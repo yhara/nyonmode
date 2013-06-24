@@ -141,8 +141,11 @@ class Field
   end
 
   def drop
-    @current.positions.each_with_index do |pos, i|
-      c, r = *pos
+    poss = @current.positions
+    (0...Pair::N_PUYOS).to_a.sort{|a, b|
+      poss[b][1] <=> poss[a][1]
+    }.each do |i|
+      c, r = *poss[i]
       drop_r = (0...ROWS).to_a.reverse.find{|rr|
                  @field[rr][c].nil?
                } || 0
