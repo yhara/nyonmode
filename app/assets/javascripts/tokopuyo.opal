@@ -17,6 +17,7 @@ end
 
 # ---
 
+# Represents a single puyo. Holds a Raphael circle
 class Puyo
   RADIUS = 15
   WIDTH = HEIGHT = DIAMETER = RADIUS*2
@@ -47,6 +48,7 @@ class Puyo
   end
 end
 
+# Represents a pair of puyo, both in the field and next area.
 class Pair
   N_PUYOS = 2
   ROT = [[[0, 0], [0, -1]],
@@ -88,6 +90,7 @@ class Pair
   end
 end
 
+# Main class. Represents 6x14 play field.
 class Field
   COLS = 6
   ROWS = 14
@@ -139,6 +142,7 @@ class Field
   end
 end
 
+# Represents next area (N pairs).
 class Nexts
   N_PAIRS = 2
 
@@ -168,6 +172,8 @@ class Nexts
   end
 end
 
+# Represents the current pair.
+# Handles validation of moving/rotation.
 class Current
   def initialize(pair)
     @c = Field::COLS/2 - 1
@@ -208,6 +214,8 @@ end
 
 # ---
 
+# main
+
 def onload(&block)
   %x{ window.onload = block }
 end
@@ -224,7 +232,6 @@ onload do
   bg.attr("fill", "#533")
 
   field = Field.new
-
   onkeydown{|code|
     field.on_keydown(code)
   }
