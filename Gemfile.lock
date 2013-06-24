@@ -150,7 +150,7 @@ DEPENDENCIES
   coffee-rails (~> 4.0.0)
   jbuilder (~> 1.2)
   jquery-rails
-  opal-rails
+  opal-rails (= 0.4.0)
   pry-rails
   rails (= 4.0.0.rc2)
   sass-rails (~> 4.0.0.rc2)

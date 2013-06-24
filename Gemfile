@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'opal-rails'
+gem 'opal-rails', '0.4.0'
+#gem 'opal', '0.4.1'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.0.0.rc2'
