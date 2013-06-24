@@ -1,0 +1,17 @@
+h1 Listing tokopuyos
+
+table
+  tr
+    th
+    th
+    th
+
+  - @tokopuyos.each do |tokopuyo|
+    tr
+      td = link_to 'Show', tokopuyo
+      td = link_to 'Edit', edit_tokopuyo_path(tokopuyo)
+      td = link_to 'Destroy', tokopuyo, :confirm => 'Are you sure?', :method => :delete
+
+br
+
+= link_to 'New Tokopuyo', new_tokopuyo_path

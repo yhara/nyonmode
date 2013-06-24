@@ -1,0 +1,9 @@
+= form_for @tokopuyo do |f|
+  - if @tokopuyo.errors.any?
+    #error_explanation
+      h2 = "#{pluralize(@tokopuyo.errors.count, "error")} prohibited this tokopuyo from being saved:"
+      ul
+        - @tokopuyo.errors.full_messages.each do |message|
+          li = message
+
+  .actions = f.submit 'Save'
