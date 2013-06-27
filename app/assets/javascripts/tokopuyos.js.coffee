@@ -1,3 +1,6 @@
+# Include underscore for spec/javascripts/
+#= require underscore
+
 # 気づいたこと
 # * 定数は@をつける必要がある。
 #   * ただ@を付けると、参照側もFoo.XXXみたいにクラス名が必要
@@ -30,8 +33,6 @@
 
 p = (args...) -> console.log(args...)
 
-$paper = null
-
 # Represents a single puyo. Holds a Raphael circle
 class Puyo
   @RADIUS: 15
@@ -55,7 +56,7 @@ class Puyo
     @circle.remove()
 
   _render: ->
-    circle = $paper.circle(-Puyo.RADIUS*2, -Puyo.RADIUS*2, Puyo.RADIUS)
+    circle = Tokopuyo.paper.circle(-Puyo.RADIUS*2, -Puyo.RADIUS*2, Puyo.RADIUS)
     circle.attr("fill", @color)
     circle.attr("stroke", "#422")
     return circle
@@ -265,11 +266,19 @@ class Current
 
 # main
 
+window.Tokopuyo =
+  Puyo: Puyo
+  Pair: Pair
+  Field: Field
+  Nexts: Nexts
+  Current: Current
+  paper: null
+
 $ ->
   w = Field.WIDTH*2
   h = Field.HEIGHT
-  $paper = Raphael(10, 50, w, h)
-  bg = $paper.rect(0, 0, w, h)
+  Tokopuyo.paper = Raphael(10, 50, w, h)
+  bg = Tokopuyo.paper.rect(0, 0, w, h)
   bg.attr("fill", "#533")
 
   field = new Field
