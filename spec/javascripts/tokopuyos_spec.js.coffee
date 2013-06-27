@@ -28,6 +28,11 @@ describe "Pair", ->
   it "has rot", ->
     expect(@pair.rot).to.equal(0)
 
+  describe ".newrot", ->
+    it "should wrap around", ->
+      expect(Pair.newrot(0, -1)).to.equal(Pair.ROT.length-1)
+      expect(Pair.newrot(Pair.ROT.length-1, +1)).to.equal(0)
+
   describe "#move", ->
     it "changes @x, @y", ->
       @pair.move(1, 2)
@@ -64,5 +69,51 @@ describe "Field", ->
       expect(@field.field[Field.ROWS-1][Current.INITIAL_COL]).not.to.null
 
 #    it "drops belowmost puyo first", ->
+#      # Rotate twice to make it upside-down
+#      @field.rotate()
+#      @field.rotate()
 #      @field.drop()
-#      expect(@field.field[Field.ROWS-1][Current.INITIAL_COL]).not.to.null
+#
+#      expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
+#        .to.equal(@field.current.pair.puyos[1])
+
+describe "Current", ->
+  beforeEach ->
+    @pair = new Pair
+    @current = new Current(@pair)
+
+  it "has col and row", ->
+    expect(@current.c).to.equal(Current.INITIAL_COL)
+    expect(@current.r).to.equal(0)
+
+  describe "move", ->
+    it "changes position of @pair", ->
+      origX = @pair.x
+      @current.move(+1)
+      expect(@pair.x).not.to.equal(origX)
+
+    it "validates new position", ->
+      origX = @pair.x
+      @current.c = 0
+      @current.move(-1)
+      expect(@pair.x).to.equal(origX)
+
+  describe "rotate", ->
+    it "changes position of puyo", ->
+      origX = @pair.puyos[1].x
+      @current.rotate(+1)
+      expect(@pair.puyos[1].x).not.to.equal(origX)
+
+    it "moves pair if needed", ->
+      origX = @pair.x
+      @current.c = 0
+      @current.rotate(-1)
+      expect(@current.c).to.equal(1)
+      expect(@pair.x).not.to.equal(origX)
+
+  describe "positions", ->
+    it "returns current col/srows of puyos", ->
+      poss = @current.positions()
+      expect(poss.length).to.equal(Pair.N_PUYOS)
+      expect(poss[0].length).to.equal(2)
+

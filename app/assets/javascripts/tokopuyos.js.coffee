@@ -30,6 +30,8 @@
 # * foo: のあとの ->をめちゃめちゃ付け忘れる
 # * ここまでやってから、->を=>に置き換える作業が始まる...
 # * p は p = (args...) -> console.log(args...) みたいにすると便利
+#   * でもinspectがないのが辛い...特に整数の配列の配列
+# * 負数をmodしたときの値が違う(!) -1%4はRubyだと3だがJSは-1
 
 p = (args...) -> console.log(args...)
 
@@ -70,7 +72,7 @@ class Pair
          [[0, 0], [-1, 0]]]
 
   @newrot: (rot, dir) ->
-    (rot + dir) % Pair.ROT.length
+    (rot + dir + Pair.ROT.length) % Pair.ROT.length
 
   @positions: (c, r, rot) ->
     _.range(Pair.N_PUYOS).map (i) ->
@@ -118,18 +120,21 @@ class Field
   onKeyDown: (code) ->
     switch code
       when 37 #left
-        @current.move(-1)
+        @move(-1)
       when 39 #right
-        @current.move(+1)
+        @move(+1)
       when 40 #down
         @drop()
       when 90 #z
-        @current.rotate(-1)
+        @rotate(-1)
       when 88 #x
-        @current.rotate(+1)
+        @rotate(+1)
 
-  _movePuyo: (puyo, c, r) ->
-    puyo.move(Field.col2x(c), Field.row2y(r))
+  move: (dir) ->
+    @current.move(dir)
+
+  rotate: (dir) ->
+    @current.rotate(dir)
 
   drop: ->
     poss = @current.positions()
@@ -143,6 +148,9 @@ class Field
 
     @current = new Current(@nexts.shift())
     @_envanish
+
+  _movePuyo: (puyo, c, r) ->
+    puyo.move(Field.col2x(c), Field.row2y(r))
 
   @VANISH_COUNT: 4
   _envanish: ->
