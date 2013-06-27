@@ -68,14 +68,15 @@ describe "Field", ->
       @field.drop()
       expect(@field.field[Field.ROWS-1][Current.INITIAL_COL]).not.to.null
 
-#    it "drops belowmost puyo first", ->
-#      # Rotate twice to make it upside-down
-#      @field.rotate()
-#      @field.rotate()
-#      @field.drop()
-#
-#      expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
-#        .to.equal(@field.current.pair.puyos[1])
+    it "drops belowmost puyo first", ->
+      # Rotate twice to make it upside-down
+      @field.rotate(+1)
+      @field.rotate(+1)
+      puyo1 = @field.current.pair.puyos[1]
+      @field.drop()
+
+      expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
+        .to.equal(puyo1)
 
 describe "Nexts", ->
   beforeEach ->

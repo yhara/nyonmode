@@ -32,6 +32,7 @@
 # * p は p = (args...) -> console.log(args...) みたいにすると便利
 #   * でもinspectがないのが辛い...特に整数の配列の配列
 # * 負数をmodしたときの値が違う(!) -1%4はRubyだと3だがJSは-1
+# * 引数の数が違ったときにエラーでないの辛い
 
 p = (args...) -> console.log(args...)
 
@@ -72,7 +73,8 @@ class Pair
          [[0, 0], [-1, 0]]]
 
   @newrot: (rot, dir) ->
-    (rot + dir + Pair.ROT.length) % Pair.ROT.length
+    ret = (rot + dir + Pair.ROT.length) % Pair.ROT.length
+    ret
 
   @positions: (c, r, rot) ->
     _.range(Pair.N_PUYOS).map (i) ->
@@ -283,6 +285,7 @@ window.Tokopuyo =
   Nexts: Nexts
   Current: Current
   paper: null
+  p: p
   main: ->
     w = Field.WIDTH*2
     h = Field.HEIGHT
