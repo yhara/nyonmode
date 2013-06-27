@@ -1,39 +1,6 @@
 # Include underscore for spec/javascripts/
 #= require underscore
 
-# 気づいたこと
-# * 定数は@をつける必要がある。
-#   * ただ@を付けると、参照側もFoo.XXXみたいにクラス名が必要
-#   * 気持ち悪いけどprototypeに定数を持たせればXXXだけで参照できる、が
-#     外から参照するときFoo::XXXみたいになる...あれこれ自然じゃん、すごい
-#     * ただ前の定数に依存した定数を書くとやっぱりめんどい(Foo::がいる)
-#     * あとconstructorではやっぱりFoo::がいる
-#       * それだけでなく、private関数でもconstructorから呼ばれる可能性がある場合はFoo::が要る...
-# * デフォルト引数で=nullを明示できるのは良い
-# * %wがない
-# * range.reverse.find.xxxとかはちょっとつらい
-#   * _.chainを使えばいい？
-# * 多重代入は[a,b] = ..
-# * 無引数のメソッド呼び出しに()を付けないといけない
-# * インスタンス変数の参照だけでなく、クラス内のメソッドを呼ぶときも@が必要
-#   * なので@まみれになる
-# * privateがない。_をつけるならその変更が必要
-# * JS/CSではlowerCamelCaseが推奨
-# * 後置ifがあるのはよい
-# * _.map, _.each使うと読みづらくなるので、mapとforEachを使いたい
-# * Coffeeのa ||= 1は「a || (a = 1)」に展開される。つまり、0や""も対象。
-#   * a ?= 1がRubyのそれに近い。「if(a==null) a=1」
-# * each_with_indexもforEachでいい。
-# * attr_readerがない。
-# * @fooがそのままなのは楽。
-# * 0 < a < 10と書けるのは楽
-# * foo: のあとの ->をめちゃめちゃ付け忘れる
-# * ここまでやってから、->を=>に置き換える作業が始まる...
-# * p は p = (args...) -> console.log(args...) みたいにすると便利
-#   * でもinspectがないのが辛い...特に整数の配列の配列
-# * 負数をmodしたときの値が違う(!) -1%4はRubyだと3だがJSは-1
-# * 引数の数が違ったときにエラーでないの辛い
-
 p = (args...) -> console.log(args...)
 
 # Represents a single puyo. Holds a Raphael circle
