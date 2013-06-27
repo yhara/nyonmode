@@ -54,6 +54,10 @@ group :development, :test do
   gem "tapp"
 end
 
+group :test, :development do
+  gem 'konacha'
+end
+
 group :test do
   gem "test-unit", ">= 2.5.5"
   gem "shoulda-context"
