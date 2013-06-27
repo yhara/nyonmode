@@ -77,6 +77,13 @@ describe "Field", ->
 #      expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
 #        .to.equal(@field.current.pair.puyos[1])
 
+describe "Nexts", ->
+  beforeEach ->
+    @nexts = new Nexts
+
+  it "has pairs", ->
+    expect(@nexts.pairs[1]).to.instanceof(Pair)
+
 describe "Current", ->
   beforeEach ->
     @pair = new Pair
