@@ -122,7 +122,7 @@ class Field
       when 39 #right
         @current.move(+1)
       when 40 #down
-        @_drop()
+        @drop()
       when 90 #z
         @current.rotate(-1)
       when 88 #x
@@ -131,7 +131,7 @@ class Field
   _movePuyo: (puyo, c, r) ->
     puyo.move(Field.col2x(c), Field.row2y(r))
 
-  _drop: ->
+  drop: ->
     poss = @current.positions()
     _.sortBy(_.range(Pair.N_PUYOS), (i) -> -poss[i][1]).forEach (i) =>
       [c, r] = poss[i]
@@ -237,8 +237,10 @@ class Nexts
 # Represents the current pair.
 # Handles validation of moving/rotation.
 class Current
+  @INITIAL_COL = Field.COLS/2 - 1
+
   constructor: (pair) ->
-    @c = Field.COLS/2 - 1
+    @c = Current.INITIAL_COL
     @r = 0
     @pair = pair
     @pair.move(Field.col2x(@c), Field.row2y(@r))
