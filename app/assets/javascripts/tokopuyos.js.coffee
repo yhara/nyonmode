@@ -2,6 +2,7 @@
 #= require underscore
 
 p = (args...) -> console.log(args...)
+pp = (args...) -> console.log(args.map((x) -> JSON.stringify(x))...)
 
 # Represents a single puyo. Holds a Raphael circle
 class Puyo
@@ -9,7 +10,7 @@ class Puyo
   @WIDTH = @HEIGHT = @DIAMETER = @RADIUS*2
 
   #           purple red green blue yellow
-  @COLORS: ["#9b59b6", "#e74c3c", "#27ae60", "#3498db", "#f1c40f"]
+  @COLORS: ["#9b59b6", "#e74c3c"] #, "#27ae60", "#3498db", "#f1c40f"]
 
   constructor: (x=null, y=null) ->
     @color = _.shuffle(Puyo.COLORS)[0]
@@ -94,6 +95,7 @@ class Field
         @move(+1)
       when 40 #down
         @drop()
+        @envanish()
       when 90 #z
         @rotate(-1)
       when 88 #x
@@ -109,20 +111,19 @@ class Field
     poss = @current.positions()
     _.sortBy(_.range(Pair.N_PUYOS), (i) -> -poss[i][1]).forEach (i) =>
       [c, r] = poss[i]
-      drop_r = _.chain(_.range(Field.ROWS)).reverse().find((rr) =>
+      drop_r = _.find(_.range(Field.ROWS).reverse(), (rr) =>
                  @field[rr][c] == null
-      ).value() || 0
+      ) || 0
       @field[drop_r][c] = @current.pair.puyos[i]
       @_movePuyo(@current.pair.puyos[i], c, drop_r)
 
     @current = new Current(@nexts.shift())
-    @_envanish
 
   _movePuyo: (puyo, c, r) ->
     puyo.move(Field.col2x(c), Field.row2y(r))
 
   @VANISH_COUNT: 4
-  _envanish: ->
+  envanish: ->
     @state = "vanishing"
 
     # Mark empty cells as already visited
@@ -132,9 +133,8 @@ class Field
     toVanish = []
     q = [[0, Field.ROWS-1]] # start from bottom left corner
     while (pos = @_nextVisiblePos(visited))
-      poss = _connectedVisiblePuyos(pos[0], pos[1], visited)
+      poss = @_connectedVisiblePuyos(pos[0], pos[1], visited)
       toVanish = toVanish.concat(poss) if poss.length >= Field.VANISH_COUNT
-    end
 
     # Remove puyos
     toVanish.forEach (pos) =>
@@ -143,7 +143,7 @@ class Field
 
     _.delay(=>
       # Drop puyos
-      _.reverse(_.range(Field.ROWS)).forEach (j) =>
+      _.range(Field.ROWS).reverse().forEach (j) =>
         _.range(Field.COLS).forEach (i) =>
           if @field[j][i] == null and (jj = _.find(_.range(j), (jj) => @field[jj][i] != null))
             @_movePuyo(@field[jj][i], i, j)
@@ -177,13 +177,14 @@ class Field
     until _.isEmpty(q)
       [i, j] = q.shift()
       visited[j][i] = true
-      Field.NEIGHBORS.forEach (dij) ->
+      Field.NEIGHBORS.forEach (dij) =>
         [di, dj] = dij
         [ni, nj] = [i+di, j+dj]
-        return unless (0 <= ni < COLS && 2 <= nj < ROWS)
+        return unless (0 <= ni < Field.COLS && 2 <= nj < Field.ROWS)
         return if visited[nj][ni]
 
-        if @field[nj][ni].color == col
+        if @field[nj][ni].color == col &&
+           !poss.some((pos) -> _.isEqual(pos, [ni, nj]))
           poss.push([ni, nj])
           q.push([ni, nj])
 
