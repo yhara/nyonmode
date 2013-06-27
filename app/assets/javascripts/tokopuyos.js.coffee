@@ -283,14 +283,13 @@ window.Tokopuyo =
   Nexts: Nexts
   Current: Current
   paper: null
+  main: ->
+    w = Field.WIDTH*2
+    h = Field.HEIGHT
+    Tokopuyo.paper = Raphael(10, 50, w, h)
+    bg = Tokopuyo.paper.rect(0, 0, w, h)
+    bg.attr("fill", "#533")
 
-$ ->
-  w = Field.WIDTH*2
-  h = Field.HEIGHT
-  Tokopuyo.paper = Raphael(10, 50, w, h)
-  bg = Tokopuyo.paper.rect(0, 0, w, h)
-  bg.attr("fill", "#533")
-
-  field = new Field
-  $(window).on "keydown", (e) ->
-    field.onKeyDown(e.keyCode)
+    field = new Field
+    $(window).on "keydown", (e) ->
+      field.onKeyDown(e.keyCode)
