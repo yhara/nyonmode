@@ -1,8 +1,8 @@
 # Include underscore for spec/javascripts/
 #= require underscore
 
-p = (args...) -> console.log(args...)
-pp = (args...) -> console.log(args.map((x) -> JSON.stringify(x))...)
+window.p = (args...) -> console.log(args...)
+window.pp = (args...) -> console.log(args.map((x) -> JSON.stringify(x))...)
 
 # Represents a single puyo. Holds a Raphael circle
 class Puyo
@@ -12,8 +12,9 @@ class Puyo
   #           purple red green blue yellow
   @COLORS: ["#9b59b6", "#e74c3c", "#27ae60", "#3498db"]#, "#f1c40f"]
 
-  constructor: (x=null, y=null) ->
-    @color = _.shuffle(Puyo.COLORS)[0]
+  constructor: (x=null, y=null, colorIdx=null) ->
+    colorIdx ?= Math.floor(Math.random()*Puyo.COLORS.length)
+    @color = Puyo.COLORS[colorIdx]
     @move(x, y) if x && y
 
   move: (x, y) ->
@@ -125,6 +126,8 @@ class Field
     puyo.move(Field.col2x(c), Field.row2y(r))
 
   @VANISH_COUNT: 4
+  @FALL_DELAY: 500
+  @NEXT_VANISH_DELAY: 500
   envanish: ->
     @state = "vanishing"
 
@@ -157,8 +160,8 @@ class Field
 
         _.delay(=>
           @envanish()
-        , 500)
-      , 500)
+        , Field.NEXT_VANISH_DELAY)
+      , Field.FALL_DELAY)
 
   # Returns a position not visited yet, or return null if there are none.
   # Invisible area (c==0, 1) are not counted.
@@ -260,7 +263,6 @@ window.Tokopuyo =
   Nexts: Nexts
   Current: Current
   paper: null
-  p: p
   main: ->
     w = Field.WIDTH*2
     h = Field.HEIGHT

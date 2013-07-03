@@ -1,11 +1,19 @@
 #= require tokopuyos
 
+# Import classes
+_.extend(this, Tokopuyo)
+
 # Note: create Null Object of raphael.js
 Tokopuyo.paper =
   circle: ->
-    return attr: ->
+    attr: ->
+    remove: ->
 
-_.extend(this, Tokopuyo)
+# Override constants for test
+_.extend Field,
+  VANISH_COUNT: 4
+  FALL_DELAY: 0
+  NEXT_VANISH_DELAY: 0
 
 describe "Puyo", ->
   it "has color", ->
@@ -16,6 +24,13 @@ describe "Puyo", ->
     puyo.move(1, 2)
     expect(puyo.x).to.equal(1)
     expect(puyo.y).to.equal(2)
+
+  describe ".new", ->
+    it "can take colorIdx", ->
+      puyos = _.range(10).map () ->
+        new Puyo(-1, -1, 0)
+      puyos.forEach (puyo) ->
+        expect(puyo.color).to.equal(puyos[0].color)
 
 describe "Pair", ->
   beforeEach ->
@@ -78,7 +93,19 @@ describe "Field", ->
       expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
         .to.equal(puyo1)
 
-  #describe "#envanish"
+  describe "#envanish", ->
+    it "removes connected puyos", (done) ->
+      _.range(4).forEach (i) =>
+        @field.field[Field.ROWS-1][i] = new Puyo(-1, -1, 0)
+
+      @field.envanish()
+
+      setTimeout(() =>
+        expect(@field.state).to.equal("normal")
+        _.range(4).forEach (i) =>
+          expect(@field.field[Field.ROWS-1][i]).to.null
+        done()
+      , 40)
 
 describe "Nexts", ->
   beforeEach ->
