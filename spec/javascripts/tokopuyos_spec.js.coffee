@@ -78,6 +78,8 @@ describe "Field", ->
       expect(@field.field[Field.ROWS-1][Current.INITIAL_COL])
         .to.equal(puyo1)
 
+  #describe "#envanish"
+
 describe "Nexts", ->
   beforeEach ->
     @nexts = new Nexts
@@ -112,12 +114,17 @@ describe "Current", ->
       @current.rotate(+1)
       expect(@pair.puyos[1].x).not.to.equal(origX)
 
-    it "moves pair if needed", ->
+    it "moves pair if needed (left)", ->
       origX = @pair.x
       @current.c = 0
       @current.rotate(-1)
       expect(@current.c).to.equal(1)
       expect(@pair.x).not.to.equal(origX)
+
+    it "moves pair if needed (right)", ->
+      @current.c = Field.COLS-1
+      @current.rotate(+1)
+      expect(@current.c).to.equal(Field.COLS-2)
 
   describe "positions", ->
     it "returns current col/srows of puyos", ->

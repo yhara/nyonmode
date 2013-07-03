@@ -10,7 +10,7 @@ class Puyo
   @WIDTH = @HEIGHT = @DIAMETER = @RADIUS*2
 
   #           purple red green blue yellow
-  @COLORS: ["#9b59b6", "#e74c3c"] #, "#27ae60", "#3498db", "#f1c40f"]
+  @COLORS: ["#9b59b6", "#e74c3c", "#27ae60", "#3498db"]#, "#f1c40f"]
 
   constructor: (x=null, y=null) ->
     @color = _.shuffle(Puyo.COLORS)[0]
@@ -108,6 +108,8 @@ class Field
     @current.rotate(dir)
 
   drop: ->
+    return unless @state == "normal"
+
     poss = @current.positions()
     _.sortBy(_.range(Pair.N_PUYOS), (i) -> -poss[i][1]).forEach (i) =>
       [c, r] = poss[i]
@@ -136,22 +138,27 @@ class Field
       poss = @_connectedVisiblePuyos(pos[0], pos[1], visited)
       toVanish = toVanish.concat(poss) if poss.length >= Field.VANISH_COUNT
 
-    # Remove puyos
-    toVanish.forEach (pos) =>
-      @field[pos[1]][pos[0]].remove()
-      @field[pos[1]][pos[0]] = null
-
-    _.delay(=>
-      # Drop puyos
-      _.range(Field.ROWS).reverse().forEach (j) =>
-        _.range(Field.COLS).forEach (i) =>
-          if @field[j][i] == null and (jj = _.find(_.range(j), (jj) => @field[jj][i] != null))
-            @_movePuyo(@field[jj][i], i, j)
-            @field[j][i] = @field[jj][i]
-            @field[jj][i] = null
-
+    if _.isEmpty(toVanish)
       @state = "normal"
-    , 1000)
+    else
+      # Remove puyos
+      toVanish.forEach (pos) =>
+        @field[pos[1]][pos[0]].remove()
+        @field[pos[1]][pos[0]] = null
+
+      _.delay(=>
+        # Drop puyos
+        _.range(Field.ROWS).reverse().forEach (j) =>
+          _.range(Field.COLS).forEach (i) =>
+            if @field[j][i] == null and (jj = _.find(_.range(j).reverse(), (jj) => @field[jj][i] != null))
+              @_movePuyo(@field[jj][i], i, j)
+              @field[j][i] = @field[jj][i]
+              @field[jj][i] = null
+
+        _.delay(=>
+          @envanish()
+        , 500)
+      , 500)
 
   # Returns a position not visited yet, or return null if there are none.
   # Invisible area (c==0, 1) are not counted.
@@ -232,7 +239,7 @@ class Current
     if @_isValid(@c, @r, Pair.newrot(@pair.rot, dir))
       @pair.rotate(dir)
     else
-      @move(@c == 0 ? +1 : -1)
+      @move(if @c == 0 then +1 else -1)
       @pair.rotate(dir)
 
   positions: ->
