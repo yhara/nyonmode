@@ -101,12 +101,24 @@ class Field
         @rotate(-1)
       when 88 #x
         @rotate(+1)
+      when 82 #r
+        @reset()
+      when 66 #b
+        @back()
 
   move: (dir) ->
     @current.move(dir)
 
   rotate: (dir) ->
     @current.rotate(dir)
+
+  reset: () ->
+    @field = @field.map (row) ->
+               row.map (puyo) ->
+                 puyo.remove() if puyo
+                 null
+
+  back: () ->
 
   drop: ->
     return unless @state == "normal"
