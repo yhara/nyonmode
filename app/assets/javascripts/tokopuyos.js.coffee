@@ -219,6 +219,7 @@ class Nexts
   @TOP: Field.TOP + Puyo.HEIGHT/2
 
   constructor: ->
+    @generator = new PairGenerator
     @pairs = _.range(Nexts.N_PAIRS).map(-> new Pair)
     @_rearrange()
 
@@ -233,6 +234,62 @@ class Nexts
       x = Nexts.LEFT + Puyo.WIDTH * (i*1.5)
       y = Nexts.TOP
       pair.move(x, y)
+
+# Algorithm to generate list of pairs.
+class PairGenerator
+  constructor: (colors) ->
+    @colors = colors
+
+  _generateColPairs: (nPairs) ->
+    puyos = []
+    perCol = Math.ceil(nPairs*Pair.N_PUYOS / @colors.length)
+    @colors.forEach (col) ->
+      puyos = puyos.concat(_.range(perCol).map(-> col))
+    puyos = puyos.slice(0, nPairs*Pair.N_PUYOS)
+
+    puyos = _.shuffle(puyos)
+    # Slice puyos by N_PUYOS to make list of pairs
+    return _.range(nPairs).map (i) ->
+      _.range(Pair.N_PUYOS).map (j) ->
+        puyos[i * Pair.N_PUYOS + j]
+
+
+# Simulates Windows Puyo-fever(classic)
+class PairGenerator16 extends PairGenerator
+  constructor: (args...) ->
+    super(args...)
+    loop
+      @list = @_generateColPairs(8)
+      break if @_goodStart(@list)
+
+  generateColPair: ->
+    if _.isEmpty(@list)
+      @list = @_generateColPairs(8)
+    return @list.shift()
+
+  # First 2 pairs must contain colors between 2..3
+  _goodStart: (list) ->
+    nCols = _.uniq(_.flatten(list[0], list[1])).length
+    2 <= nCols <= 3
+
+# Simulates AC Puyo-2
+class PairGenerator128 extends PairGenerator
+  constructor: (args...) ->
+    super(args...)
+    loop
+      @list = @_generateColPairs(128)
+      break if @_goodStart(@list)
+    @cur = 0
+
+  generateColPair: ->
+    ret = @list[@cur]
+    @cur = (@cur + 1) % 128
+    ret
+
+  # First 3 pairs must contain colors <= 3
+  _goodStart: (list) ->
+    nCols = _.uniq(_.flatten(list[0], list[1], list[2])).length
+    1 <= nCols <= 3
 
 # Represents the current pair.
 # Handles validation of moving/rotation.
@@ -273,6 +330,9 @@ window.Tokopuyo =
   Pair: Pair
   Field: Field
   Nexts: Nexts
+  PairGenerator: PairGenerator
+  PairGenerator16: PairGenerator16
+  PairGenerator128: PairGenerator128
   Current: Current
   paper: null
   main: ->

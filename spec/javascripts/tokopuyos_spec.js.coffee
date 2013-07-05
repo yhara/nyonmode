@@ -114,6 +114,38 @@ describe "Nexts", ->
   it "has pairs", ->
     expect(@nexts.pairs[1]).to.instanceof(Pair)
 
+describe "PairGenerator", ->
+  beforeEach ->
+    @cols = [0, 1, 2, 3]
+    @gen = new PairGenerator(@cols)
+
+  it "generate pairs of colors", ->
+    pairs = @gen._generateColPairs(4)
+    expect(pairs.length).to.equal(4)
+    expect(pairs[0].length).to.equal(Pair.N_PUYOS)
+
+describe "PairGenerator16", ->
+  beforeEach ->
+    @cols = [0, 1, 2, 3]
+    @gen = new PairGenerator16(@cols)
+
+  it "generate pair of colors", ->
+    pair = @gen.generateColPair()
+    expect(pair.length).to.equal(Pair.N_PUYOS)
+    pair.forEach (col) =>
+      expect(@cols).to.include(col)
+
+describe "PairGenerator128", ->
+  beforeEach ->
+    @cols = [0, 1, 2, 3]
+    @gen = new PairGenerator128(@cols)
+
+  it "generate pair of colors", ->
+    pair = @gen.generateColPair()
+    expect(pair.length).to.equal(Pair.N_PUYOS)
+    pair.forEach (col) =>
+      expect(@cols).to.include(col)
+
 describe "Current", ->
   beforeEach ->
     @pair = new Pair
