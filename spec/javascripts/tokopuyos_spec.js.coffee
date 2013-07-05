@@ -98,14 +98,13 @@ describe "Field", ->
       _.range(4).forEach (i) =>
         @field.field[Field.ROWS-1][i] = new Puyo(-1, -1, 0)
 
-      @field.envanish()
-
-      setTimeout(() =>
+      onDone = =>
         expect(@field.state).to.equal("normal")
         _.range(4).forEach (i) =>
           expect(@field.field[Field.ROWS-1][i]).to.null
         done()
-      , 100)
+
+      @field.envanish(onDone)
 
 describe "Nexts", ->
   beforeEach ->

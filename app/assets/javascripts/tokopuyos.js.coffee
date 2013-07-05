@@ -140,7 +140,7 @@ class Field
   @VANISH_COUNT: 4
   @FALL_DELAY: 500
   @NEXT_VANISH_DELAY: 500
-  envanish: ->
+  envanish: (done=null) ->
     @state = "vanishing"
 
     # Mark empty cells as already visited
@@ -155,6 +155,7 @@ class Field
 
     if _.isEmpty(toVanish)
       @state = "normal"
+      done()
     else
       # Remove puyos
       toVanish.forEach (pos) =>
@@ -171,7 +172,7 @@ class Field
               @field[jj][i] = null
 
         _.delay(=>
-          @envanish()
+          @envanish(done)
         , Field.NEXT_VANISH_DELAY)
       , Field.FALL_DELAY)
 
