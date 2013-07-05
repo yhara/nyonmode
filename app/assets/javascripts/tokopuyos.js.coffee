@@ -49,8 +49,8 @@ class Pair
     _.range(Pair.N_PUYOS).map (i) ->
       [c + Pair.ROT[rot][i][0], r + Pair.ROT[rot][i][1]]
 
-  constructor: (x=null, y=null) ->
-    @puyos = _.range(Pair.N_PUYOS).map(-> new Puyo)
+  constructor: (x=null, y=null, cols=[]) ->
+    @puyos = _.range(Pair.N_PUYOS).map((i) -> new Puyo(null, null, cols[i]))
     @rot = 0
     @move(x, y) if x && y
 
@@ -219,13 +219,13 @@ class Nexts
   @TOP: Field.TOP + Puyo.HEIGHT/2
 
   constructor: ->
-    @generator = new PairGenerator
-    @pairs = _.range(Nexts.N_PAIRS).map(-> new Pair)
+    @generator = new PairGenerator16(_.range(Puyo.COLORS.length))
+    @pairs = _.range(Nexts.N_PAIRS).map(=> @generator.generatePair())
     @_rearrange()
 
   shift: ->
     nextPair = @pairs.shift()
-    @pairs.push(new Pair)
+    @pairs.push(@generator.generatePair())
     @_rearrange()
     return nextPair
 
@@ -239,6 +239,10 @@ class Nexts
 class PairGenerator
   constructor: (colors) ->
     @colors = colors
+
+  generatePair: ->
+    cols = @generateColPair()
+    new Pair(null, null, cols)
 
   _generateColPairs: (nPairs) ->
     puyos = []
