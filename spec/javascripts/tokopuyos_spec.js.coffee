@@ -105,7 +105,7 @@ describe "Field", ->
         _.range(4).forEach (i) =>
           expect(@field.field[Field.ROWS-1][i]).to.null
         done()
-      , 40)
+      , 100)
 
 describe "Nexts", ->
   beforeEach ->
