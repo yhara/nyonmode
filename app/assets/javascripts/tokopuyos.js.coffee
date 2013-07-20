@@ -172,7 +172,7 @@ class Field
 
     if _.isEmpty(toVanish)
       @state = "normal"
-      done()
+      done() if done
     else
       # Remove puyos
       toVanish.forEach (pos) =>
