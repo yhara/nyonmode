@@ -294,7 +294,7 @@ class PairGenerator16 extends PairGenerator
 
   # First 2 pairs must contain colors between 2..3
   _goodStart: (list) ->
-    nCols = _.uniq(_.flatten(list[0], list[1])).length
+    nCols = _.uniq(_.flatten([list[0], list[1]])).length
     2 <= nCols <= 3
 
 # Simulates AC Puyo-2
@@ -313,7 +313,7 @@ class PairGenerator128 extends PairGenerator
 
   # First 3 pairs must contain colors <= 3
   _goodStart: (list) ->
-    nCols = _.uniq(_.flatten(list[0], list[1], list[2])).length
+    nCols = _.uniq(_.flatten([list[0], list[1], list[2]])).length
     1 <= nCols <= 3
 
 # Represents the current pair.
