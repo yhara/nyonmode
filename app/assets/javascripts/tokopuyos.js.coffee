@@ -2,7 +2,7 @@
 #= require underscore
 
 window.p = (args...) -> console.log(args...)
-window.pp = (args...) -> console.log(args.map((x) -> JSON.stringify(x))...)
+window.pp = (args...) -> console.log(args.map(JSON.stringify)...)
 
 # Represents a single puyo. Holds a Raphael circle
 class Puyo
