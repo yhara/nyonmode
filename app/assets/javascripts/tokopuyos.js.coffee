@@ -65,6 +65,10 @@ class Pair
     @rot = Pair.newrot(@rot, dir)
     @move(@x, @y)
 
+  remove: ->
+    @puyos.forEach((x) -> x.remove())
+
+
 # Main class. Represents 6x14 play field.
 class Field
   @COLS: 6
@@ -95,7 +99,6 @@ class Field
     @nexts = new Nexts
     @current = new Current(@nexts.shift())
 
-
   onKeyDown: (code) ->
     switch code
       when 37 #left
@@ -121,6 +124,12 @@ class Field
     @current.rotate(dir)
 
   reset: () ->
+    @nexts.remove()
+    @nexts = new Nexts
+
+    @current.remove()
+    @current = new Current(@nexts.shift())
+
     @field = @field.map (row) ->
                row.map (puyo) ->
                  puyo.remove() if puyo
@@ -238,6 +247,9 @@ class Nexts
     @_rearrange()
     return nextPair
 
+  remove: ->
+    @pairs.forEach((x) -> x.remove())
+
   _rearrange: ->
     @pairs.forEach (pair, i) ->
       x = Nexts.LEFT + Puyo.WIDTH * (i*1.5)
@@ -329,6 +341,9 @@ class Current
 
   positions: ->
     Pair.positions(@c, @r, @pair.rot)
+
+  remove: ->
+    @pair.remove()
 
   _isValid: (c, r, rot) ->
     _.every Pair.positions(c, r, rot), (pos) ->
