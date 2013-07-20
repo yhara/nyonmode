@@ -80,6 +80,13 @@ class Field
   @row2y: (j) -> Field.TOP + Puyo.HEIGHT * j
 
   constructor: ->
+    # Render background
+    # Note: must be prior to new Current() and new Nexts(),
+    # otherwise they will go below background
+    Tokopuyo.paper.rect(Field.LEFT, Field.TOP + Puyo.HEIGHT*Pair.N_PUYOS,
+                        Field.WIDTH, Field.HEIGHT)
+                  .attr("fill", "#888")
+
     @field = _.range(Field.ROWS).map ->
                _.range(Field.COLS).map ->
                  null
@@ -87,6 +94,7 @@ class Field
 
     @nexts = new Nexts
     @current = new Current(@nexts.shift())
+
 
   onKeyDown: (code) ->
     switch code
@@ -344,6 +352,7 @@ window.Tokopuyo =
     w = Field.WIDTH*2
     h = Field.HEIGHT
     Tokopuyo.paper = Raphael(10, 50, w, h)
+
     bg = Tokopuyo.paper.rect(0, 0, w, h)
     bg.attr("fill", "#533")
 
