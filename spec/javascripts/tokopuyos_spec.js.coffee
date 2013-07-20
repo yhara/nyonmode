@@ -5,9 +5,10 @@ _.extend(this, Tokopuyo)
 
 # Note: create Null Object of raphael.js
 Tokopuyo.paper =
-  circle: ->
-    attr: ->
-    remove: ->
+  circle: -> @
+  rect: -> @
+  attr: -> @
+  remove: -> @
 
 # Override constants for test
 _.extend Field,
